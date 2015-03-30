@@ -1,0 +1,810 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Documentation of the Restricted Partition Function &mdash; resparfunc 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="resparfunc 1.0 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">resparfunc 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation of the Restricted Partition Function</a><ul>
+<li><a class="reference internal" href="#module-resparfunc">RestrictedPartitionFunction class - optimized version</a></li>
+<li><a class="reference internal" href="#member-functions">Member functions</a></li>
+<li><a class="reference internal" href="#module-simple-resparfunc">RestrictedPartitionFunction class - simple version</a></li>
+<li><a class="reference internal" href="#member-functions-of-simple-resparfunc-s-restrictedpartitionfunction">Member functions of simple-resparfunc&#8217;s RestrictedPartitionFunction</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="documentation-of-the-restricted-partition-function">
+<h1>Documentation of the Restricted Partition Function<a class="headerlink" href="#documentation-of-the-restricted-partition-function" title="Permalink to this headline">¶</a></h1>
+<p>This is a sagemath implementation of an algorithm to construct the restricted partition function for a given list of positive numbers (also known als Sylvester&#8217;s denumerant). A prerequisite for using this code is a properly working installation of <a class="reference external" href="http://www.sagemath.org/">sage</a>.</p>
+<p>The code allows to explore the periodic structure of the partition function as described in the paper &#8220;Properties of the Restricted Partition Function&#8221; and implements the algorithm outlined therein. It comes in two versions - a simple one which is intended mainly for illustration of the algorithm outlined in the paper and an optimized version that can be used for restriction lists with more and / or greater numbers. The description of the optimized version also contains various usage examples.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">We want to draw your attention especially to the last example contained in the description of the RestrictedPartitionFunction class, where one can get an impression about the performance of the algorithm and the space needed for the representation of the restricted partition function.
+The tests have been done on a 64-bit Ubuntu laptop with 4 GB of RAM and four Intel(R) Core(TM) i5-2410M processors with a locally installed copy of sage version 6.2.</p>
+</div>
+<div class="section" id="module-resparfunc">
+<span id="restrictedpartitionfunction-class-optimized-version"></span><h2>RestrictedPartitionFunction class - optimized version<a class="headerlink" href="#module-resparfunc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="resparfunc.RestrictedPartitionFunction">
+<em class="property">class </em><tt class="descclassname">resparfunc.</tt><tt class="descname">RestrictedPartitionFunction</tt><big>(</big><em>parts_in=None</em>, <em>poly_coeffs=None</em>, <em>empty=False</em><big>)</big><a class="headerlink" href="#resparfunc.RestrictedPartitionFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>A RestrictedPartitionFunction allows to get the number
+of partitions with parts in a given list of positive integers
+for arbitrary nonnegative integers very efficiently.</p>
+<p>Once constructed with <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction(parts_in=A)</span></tt>
+for a specific restriction list <tt class="docutils literal"><span class="pre">A</span></tt>, a
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object can be used to calculate the
+number of partitions for an integer <tt class="docutils literal"><span class="pre">t</span></tt> using the object&#8217;s method
+<tt class="docutils literal"><span class="pre">number_of_partitions(t)</span></tt>.
+Note that this gives the same result as
+<tt class="docutils literal"><span class="pre">Partitions(t,</span> <span class="pre">parts_in=A).cardinality()</span></tt>, but the once
+constructed object can be reused for different values of <tt class="docutils literal"><span class="pre">t</span></tt> and
+the values of <tt class="docutils literal"><span class="pre">t</span></tt> can be considerably larger.</p>
+<p>Constructing a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object for a specific
+restriction list <tt class="docutils literal"><span class="pre">A</span></tt> can take a long time depending on the numbers
+in  <tt class="docutils literal"><span class="pre">A</span></tt>. The needed time in seconds is printed when the
+calculation is finished, but this can be suppressed by setting the
+class variable <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction.print_time=False</span></tt>.
+The construction of the object is an iterative process with a number
+of levels equal to the size of the restriction list. To watch the
+progress of construction, one can set the class variable
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction.print_info=True</span></tt>. Before starting
+the iterative process, the numbers of the restriction list are
+first rearranged with the purpose to get a shorter construction
+time. For testing purposes, it is possible to suppress this
+rearrangement by setting the class variable
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction.preserve_order=True</span></tt>.</p>
+<p>The representation of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> is based on
+the fact that the restricted partition function <img class="math" src="_images/math/5835f9341e20dd8400f9c723bfcad70cfcc3a231.png" alt="d(t)"/> for
+<img class="math" src="_images/math/bf436760bdd5c3bd026105d2c1da72d2e35a48a3.png" alt="A=(a_{1},a_{2},...,a_{n})"/> can be written as
+<img class="math" src="_images/math/4d47fb3df455c4289ad8058e2b486d857775b122.png" alt="d(t)=\sum_{m=0}^{n-1}\sum_{i=1}^{u_{m}}f_{m,i}(t)t^{m}"/> with
+appropriate natural numbers <img class="math" src="_images/math/ffaaac0e785dcacdf0459f6106bb5469dca25e56.png" alt="u_{m}"/> and periodical functions
+<img class="math" src="_images/math/ea51a34ed63a6a9e16dfdbcb3e7dbe0f6c842c4f.png" alt="f_{m,i}"/>, where <img class="math" src="_images/math/2ef47443c70ee8c00cba1c50b2cf488fcec45b8b.png" alt="m=0,...,n-1"/> and <img class="math" src="_images/math/2d6119de8b632bf45f1451acdc264cb90c5656e9.png" alt="i=1,...,u_{m}"/>.
+The periods of
+the functions <img class="math" src="_images/math/ea51a34ed63a6a9e16dfdbcb3e7dbe0f6c842c4f.png" alt="f_{m,i}"/> are correlated with common factors of the
+numbers <img class="math" src="_images/math/2a772bd794fbedb2976268c491686644aefc02e8.png" alt="a_{i}"/>.
+We represent a periodical function <img class="math" src="_images/math/ea51a34ed63a6a9e16dfdbcb3e7dbe0f6c842c4f.png" alt="f_{m,i}"/> by an object of type
+<tt class="docutils literal"><span class="pre">PeriodObject</span></tt>  containing its period <img class="math" src="_images/math/7096d368b028675eebc1450e7e0b8e7c715d892d.png" alt="P_{m,i}"/> and a list of
+function values <img class="math" src="_images/math/252dfe9bc51567c22b88b5129070b32328e433b2.png" alt="f_{m,i}(0),...,f_{m,i}(P_{m,i}-1)"/>. 
+Remark that such a representation of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>
+is not unique.</p>
+<p>To explore the content of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object
+<tt class="docutils literal"><span class="pre">d</span></tt>, one can use the object method <tt class="docutils literal"><span class="pre">get_content_str()</span></tt>. With the
+argument <tt class="docutils literal"><span class="pre">output_format</span></tt> it is possible to select the extent and
+presentation of the returned content. As an example, with
+<tt class="docutils literal"><span class="pre">output_format=summary</span></tt> one gets the number of period objects
+and the respective periods for each power. The full content is
+returned if <tt class="docutils literal"><span class="pre">output_format=full</span></tt> is given. Be aware that the
+amount of information can be very large in this case. Another
+string representation of the full content which may be better
+suited for a subsequent evaluation can be obtained with
+<tt class="docutils literal"><span class="pre">output_format=list</span></tt>.
+The full content in <tt class="docutils literal"><span class="pre">full</span></tt> or <tt class="docutils literal"><span class="pre">list</span></tt> format can also be written
+to a file with the object method <tt class="docutils literal"><span class="pre">to_file</span></tt>. In contrast to the
+builtin <tt class="docutils literal"><span class="pre">save</span></tt>, the content is saved in printable form, so it can
+be easily explored with a suitable text editor.
+With the class method <tt class="docutils literal"><span class="pre">from_file</span></tt>, an object with the same
+content can be reconstructed from a file written with <tt class="docutils literal"><span class="pre">to_file</span></tt>.</p>
+<p>If a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object for a given restriction
+list has been already constructed, one can obtain a new
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> for a restriction list with an
+additional positive integer <tt class="docutils literal"><span class="pre">a</span></tt> with the class method
+<tt class="docutils literal"><span class="pre">build_next()</span></tt>.</p>
+<p>EXAMPLES:</p>
+<p>Construct some partition functions for specific restriction lists
+and use them to get the number of partitions for several numbers:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">print_time</span><span class="o">=</span><span class="bp">False</span>  <span class="c"># suppress timing for doctest</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="go">8338334</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">20</span><span class="p">)</span>
+<span class="go">833333333333333333383333333333333333334</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">ndigits</span><span class="p">()</span>
+<span class="go">1999999</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">19</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="go">8</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="go">39327093201690271931461735037880</span>
+</pre></div>
+</div>
+<p>Comparing <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction().number_of_partitions()</span></tt> with
+<tt class="docutils literal"><span class="pre">Partitions().cardinality()</span></tt>. The result must be the same:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">print_time</span><span class="o">=</span><span class="bp">False</span>  <span class="c"># suppress timing for doctest</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">t</span><span class="o">=</span><span class="mi">500</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="n">Partitions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">cardinality</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">sage: </span><span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">100.</span><span class="o">.</span><span class="mi">200</span><span class="p">]</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Partitions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">cardinality</span><span class="p">()])</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+<p>Showing full content of period objects contained in the representation
+of an object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">A</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span> <span class="o">=</span> <span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s">&#39;full&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [5, 6, 10], consisting of 3 lists with a total of 5 period objects:</span>
+<span class="go">power=0, 2 period object(s):</span>
+<span class="go">P=10, values=[2/3, 57/200, -7/75, -7/200, -28/75, 5/8, 17/75, 13/200, -22/75, -3/200]</span>
+<span class="go">P=6, values=[1/3, -1/3, 0, 0, 1/3, 0]</span>
+<span class="go">power=1, 2 period object(s):</span>
+<span class="go">P=5, values=[29/300, 23/300, 17/300, 11/300, 1/60]</span>
+<span class="go">P=2, values=[-1/75, -3/100]</span>
+<span class="go">power=2, 1 period object(s):</span>
+<span class="go">P=1, values=[1/600]</span>
+</pre></div>
+</div>
+<p>Showing summary of period objects contained in the
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object constructed above:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [5, 6, 10], consisting of 3 lists with a total of 5 period objects:</span>
+<span class="go">power=0, 2 PO(s) with period: 10,6</span>
+<span class="go">power=1, 2 PO(s) with period: 5,2</span>
+<span class="go">power=2, 1 PO(s) with period: 1</span>
+</pre></div>
+</div>
+<p>Showing summary of period objects contained in the representation of an
+object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> may be suited especially
+to get a quick overview if the full representation of the period
+objects is too large for a screen output:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [2, 5, 7, 9, 13, 19, 4, 2, 12, 8, 15, 10, 9, 20, 10], consisting of 15 lists with a total of 29 period objects:</span>
+<span class="go">power=0, 8 PO(s) with period: 12,15,7,9,13,19,8,20</span>
+<span class="go">power=1, 3 PO(s) with period: 10,4,9</span>
+<span class="go">power=2, 3 PO(s) with period: 10,4,3</span>
+<span class="go">power=3, 3 PO(s) with period: 4,5,3</span>
+<span class="go">power=4, 2 PO(s) with period: 5,2</span>
+<span class="go">power=5, 1 PO(s) with period: 2</span>
+<span class="go">power=6, 1 PO(s) with period: 2</span>
+<span class="go">power=7, 1 PO(s) with period: 2</span>
+<span class="go">power=8, 1 PO(s) with period: 1</span>
+<span class="go">power=9, 1 PO(s) with period: 1</span>
+<span class="go">power=10, 1 PO(s) with period: 1</span>
+<span class="go">power=11, 1 PO(s) with period: 1</span>
+<span class="go">power=12, 1 PO(s) with period: 1</span>
+<span class="go">power=13, 1 PO(s) with period: 1</span>
+<span class="go">power=14, 1 PO(s) with period: 1</span>
+</pre></div>
+</div>
+<p>Writing the full content in string form to a file where it can be
+viewed with a suitable text editor:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="s">&#39;fullout1.txt&#39;</span><span class="p">,</span> <span class="n">output_format</span><span class="o">=</span><span class="s">&#39;full&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Construct partition functions for some well-known restriction lists,
+showing the needed time in seconds to get an impression about the
+performance of the algorithm. Additionally, save the full content
+of each partition function to a file and show the file size in bytes
+to get an impression about the space needed for the representation
+of the restricted partition function (Note: the comments random and/or
+long time are for automatic doctesting as the times are not exactly
+reproducible and some of them exceed one second):</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">print_time</span><span class="o">=</span><span class="bp">True</span> <span class="c"># we want to see the timing</span>
+<span class="gp">sage: </span><span class="n">pathname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SAGE_TMP</span><span class="p">,</span> <span class="s">&#39;fullout&#39;</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random time</span>
+<span class="go">time: 0.016</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>
+<span class="go">598</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">12223</span><span class="p">,</span> <span class="mi">12224</span><span class="p">,</span> <span class="mi">36674</span><span class="p">,</span> <span class="mi">61119</span><span class="p">,</span> <span class="mi">85569</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random long time</span>
+<span class="go">time: 14.232</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>       <span class="c"># depends on long time line</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>   <span class="c"># depends on long time line</span>
+<span class="go">7952568</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">12137</span><span class="p">,</span> <span class="mi">24269</span><span class="p">,</span> <span class="mi">36405</span><span class="p">,</span> <span class="mi">36407</span><span class="p">,</span> <span class="mi">48545</span><span class="p">,</span> <span class="mi">60683</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random long time</span>
+<span class="go">time: 17.108</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>       <span class="c"># depends on long time line</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>   <span class="c"># depends on long time line</span>
+<span class="go">7357507</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">20601</span><span class="p">,</span><span class="mi">40429</span><span class="p">,</span><span class="mi">40429</span><span class="p">,</span><span class="mi">45415</span><span class="p">,</span><span class="mi">53725</span><span class="p">,</span><span class="mi">61919</span><span class="p">,</span><span class="mi">64470</span><span class="p">,</span><span class="mi">69340</span><span class="p">,</span><span class="mi">78539</span><span class="p">,</span><span class="mi">95043</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random long time</span>
+<span class="go">time: 93.444</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>       <span class="c"># depends on long time line</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>   <span class="c"># depends on long time line</span>
+<span class="go">42745525</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">19</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random time</span>
+<span class="go">time: 0.144</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>
+<span class="go">6295</span>
+<span class="gp">sage: </span><span class="n">A</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">61</span><span class="p">)]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random long time</span>
+<span class="go">time: 16.564</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>       <span class="c"># depends on long time line</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>   <span class="c"># depends on long time line</span>
+<span class="go">379127</span>
+<span class="gp">sage: </span><span class="n">A</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">101</span><span class="p">)]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span> <span class="c"># random long time</span>
+<span class="go">time: 130.536</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s">&#39;full&#39;</span><span class="p">)</span>       <span class="c"># depends on long time line</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>   <span class="c"># depends on long time line</span>
+<span class="go">2146284</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="member-functions">
+<h2>Member functions<a class="headerlink" href="#member-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="method">
+<dt id="resparfunc.RestrictedPartitionFunction.number_of_partitions">
+<tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">number_of_partitions</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#resparfunc.RestrictedPartitionFunction.number_of_partitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of partitions of a nonnegative integer <tt class="docutils literal"><span class="pre">t</span></tt> with
+parts in a specific restriction list as contained in the current
+object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>.</p>
+<p>Note that this gives the same result as
+<tt class="docutils literal"><span class="pre">Partitions(t,</span> <span class="pre">parts_in=A).cardinality()</span></tt>, but the once
+constructed object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> can
+be used to call <tt class="docutils literal"><span class="pre">number_of_partitions</span></tt> consecutively for
+different values of <tt class="docutils literal"><span class="pre">t</span></tt> and the values of <tt class="docutils literal"><span class="pre">t</span></tt> can be
+considerably larger.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">t</span></tt> &#8211; a nonnegative integer</li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>the number of partitions of <tt class="docutils literal"><span class="pre">t</span></tt> with parts in the restriction
+list as contained in the current object</li>
+</ul>
+<p>EXAMPLES:</p>
+<p>Construct a partition function for a specific restriction list
+and use it to get the number of partitions for several numbers:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">print_time</span><span class="o">=</span><span class="bp">False</span>  <span class="c"># suppress timing for doctest</span>
+<span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">20</span><span class="p">,</span><span class="mi">15</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">,</span><span class="mi">19</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+<span class="go">8</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">100000</span><span class="p">)</span>
+<span class="go">3591162466582613140951155095382336216938321372</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span>
+<span class="go">355852439929171688810360576684162614436054571631359229484001</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">7</span><span class="p">)</span>
+<span class="go">35552753497121464994061233188681496764739760087879328128319410451219615958</span>
+</pre></div>
+</div>
+<p>For increasing powers of 10**10, get the number of partitions for the
+same same restriction list and show the number of digits of the
+resulting numbers:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="k">print</span> <span class="p">[</span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">10</span><span class="o">**</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">ndigits</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)]</span> <span class="c"># long time (1 min)</span>
+<span class="go">[116, 1376, 13976, 139976, 1399976, 13999976, 139999976]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="resparfunc.RestrictedPartitionFunction.get_content_str">
+<tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">get_content_str</tt><big>(</big><em>output_format='summary'</em><big>)</big><a class="headerlink" href="#resparfunc.RestrictedPartitionFunction.get_content_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string representation of the content of an object of
+type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> where the amount and
+representation of the information is selected by the argument
+<tt class="docutils literal"><span class="pre">output_format</span></tt>.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">output_format</span></tt> - (default: <tt class="docutils literal"><span class="pre">'summary'</span></tt>)<ul>
+<li><tt class="docutils literal"><span class="pre">'summary'</span></tt> &#8211; show number of period objects and their period</li>
+<li><tt class="docutils literal"><span class="pre">'full'</span></tt> &#8211; show full content, including values of period objects</li>
+<li><tt class="docutils literal"><span class="pre">'list'</span></tt> &#8211; show full content in list form</li>
+</ul>
+</li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>a string with the representation of the content of the object in
+the requested <tt class="docutils literal"><span class="pre">output_format</span></tt>.</li>
+</ul>
+<p>EXAMPLES:</p>
+<p>Let us have a look at the various representations for a very small
+<tt class="docutils literal"><span class="pre">RestrictedParttionFunction</span></tt> object:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">print_time</span><span class="o">=</span><span class="bp">False</span>  <span class="c"># suppress timing for doctest</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The usual string representation does not reveal the content:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span>
+<span class="go">RestrictedPartitionFunction for [1, 2, 3], consisting of 3 lists with a total of 4 period objects</span>
+</pre></div>
+</div>
+<p>With <tt class="docutils literal"><span class="pre">get_content_str(output_format='summary')</span></tt> or, equivalently,
+<tt class="docutils literal"><span class="pre">get_content_str()</span></tt> one gets the number of period objects and
+their periods for each power:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">()</span>
+<span class="go">RestrictedPartitionFunction for [1, 2, 3], consisting of 3 lists with a total of 4 period objects:</span>
+<span class="go">power=0, 2 PO(s) with period: 2,3</span>
+<span class="go">power=1, 1 PO(s) with period: 1</span>
+<span class="go">power=2, 1 PO(s) with period: 1</span>
+</pre></div>
+</div>
+<p>With <tt class="docutils literal"><span class="pre">get_content_str(output_format='full')</span></tt>, the values stored in
+the period objects are shown additionally:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="s">&#39;full&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [1, 2, 3], consisting of 3 lists with a total of 4 period objects:</span>
+<span class="go">power=0, 2 period object(s):</span>
+<span class="go">P=2, values=[1/4, 0]</span>
+<span class="go">P=3, values=[3/4, 5/12, 5/12]</span>
+<span class="go">power=1, 1 period object(s):</span>
+<span class="go">P=1, values=[1/2]</span>
+<span class="go">power=2, 1 period object(s):</span>
+<span class="go">P=1, values=[1/12]</span>
+</pre></div>
+</div>
+<p>With <tt class="docutils literal"><span class="pre">output_format='list'</span></tt> the full information is formatted in
+list form, which may be better suited for a subsequent
+evaluation:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="s">&#39;list&#39;</span><span class="p">)</span>
+<span class="go">[[1, 2, 3], [[[1/4, 0], [3/4, 5/12, 5/12]], [[1/2]], [[1/12]]]]</span>
+</pre></div>
+</div>
+<p>We now create a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> for a larger
+restriction list and show the summary of its content:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [2, 5, 7, 9, 13, 19, 4, 2, 12, 8, 15, 10, 9, 20, 10], consisting of 15 lists with a total of 29 period objects:</span>
+<span class="go">power=0, 8 PO(s) with period: 12,15,7,9,13,19,8,20</span>
+<span class="go">power=1, 3 PO(s) with period: 10,4,9</span>
+<span class="go">power=2, 3 PO(s) with period: 10,4,3</span>
+<span class="go">power=3, 3 PO(s) with period: 4,5,3</span>
+<span class="go">power=4, 2 PO(s) with period: 5,2</span>
+<span class="go">power=5, 1 PO(s) with period: 2</span>
+<span class="go">power=6, 1 PO(s) with period: 2</span>
+<span class="go">power=7, 1 PO(s) with period: 2</span>
+<span class="go">power=8, 1 PO(s) with period: 1</span>
+<span class="go">power=9, 1 PO(s) with period: 1</span>
+<span class="go">power=10, 1 PO(s) with period: 1</span>
+<span class="go">power=11, 1 PO(s) with period: 1</span>
+<span class="go">power=12, 1 PO(s) with period: 1</span>
+<span class="go">power=13, 1 PO(s) with period: 1</span>
+<span class="go">power=14, 1 PO(s) with period: 1</span>
+</pre></div>
+</div>
+<p>Then we use the string created with <tt class="docutils literal"><span class="pre">output_format='list'</span></tt> to
+analyze the content of the partition function.
+First, we want to see the for example the second period object
+from power 4. The next example extracts the greatest value from
+the period objects of each power and shows them:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d_list_str</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s">&#39;list&#39;</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d_list</span> <span class="o">=</span> <span class="n">sage_eval</span><span class="p">(</span><span class="n">d_list_str</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d_list</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">4</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">[145092185570084783/624488216002560000000,</span>
+<span class="go"> 138207696216866033/624488216002560000000]</span>
+<span class="gp">sage: </span><span class="p">[(</span><span class="n">i</span><span class="p">,</span> <span class="nb">max</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pl</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">p</span><span class="p">]))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pl</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">d_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+<span class="go">[(0, 3076481423136499854771839/506341290417035673600000),</span>
+<span class="go"> (1, 683728757821142046661/3091216669212672000000),</span>
+<span class="go"> (2, 33978463148176350767/1545608334606336000000),</span>
+<span class="go"> (3, 1591376310823161673/429335648501760000000),</span>
+<span class="go"> (4, 145092185570084783/624488216002560000000),</span>
+<span class="go"> (5, 10889579327/1069915392000000),</span>
+<span class="go"> (6, 4339575160381/14636442562560000000),</span>
+<span class="go"> (7, 761837855243/122946117525504000000),</span>
+<span class="go"> (8, 32978781481/351274621501440000000),</span>
+<span class="go"> (9, 1673677/1621267483852800000),</span>
+<span class="go"> (10, 11454959/1405098486005760000000),</span>
+<span class="go"> (11, 278429/6182433338425344000000),</span>
+<span class="go"> (12, 15313/92736500076380160000000),</span>
+<span class="go"> (13, 29/80371633399529472000000),</span>
+<span class="go"> (14, 1/2813007168983531520000000)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="resparfunc.RestrictedPartitionFunction.to_file">
+<tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">to_file</tt><big>(</big><em>filename</em>, <em>output_format='full'</em><big>)</big><a class="headerlink" href="#resparfunc.RestrictedPartitionFunction.to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write the string representation of the full content of an
+object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> to a file.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">filename</span></tt> &#8211; name of file</li>
+<li><tt class="docutils literal"><span class="pre">output_format</span></tt> &#8211; (default: <tt class="docutils literal"><span class="pre">'full'</span></tt>)<ul>
+<li><tt class="docutils literal"><span class="pre">'full'</span></tt> &#8211; write full content, including values of period objects</li>
+<li><tt class="docutils literal"><span class="pre">'list'</span></tt> &#8211; write full content in list form</li>
+</ul>
+</li>
+</ul>
+<p>OUTPUT:</p>
+<p>A string representation of the full content of the object is
+written to the specified file in the requested <tt class="docutils literal"><span class="pre">output_format</span></tt></p>
+<p>EXAMPLES:</p>
+<p>Create a restricted partition function object and save its full
+content to a file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">31</span><span class="p">])</span>
+<span class="gp">sage: </span><span class="n">d</span>
+<span class="go">RestrictedPartitionFunction for [6, 31, 10], consisting of 3 lists with a total of 5 period objects</span>
+<span class="gp">sage: </span><span class="n">pathname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SAGE_TMP</span><span class="p">,</span> <span class="s">&#39;outfile1&#39;</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">to_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="resparfunc.RestrictedPartitionFunction.from_file">
+<em class="property">classmethod </em><tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">from_file</tt><big>(</big><em>filename</em><big>)</big><a class="headerlink" href="#resparfunc.RestrictedPartitionFunction.from_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>
+from a file that has been created before by means of
+the object method <tt class="docutils literal"><span class="pre">to_file</span></tt>.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">filename</span></tt> &#8211; name of file</li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>an object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt></li>
+</ul>
+<p>EXAMPLES:</p>
+<p>Suppose the example from the description of <tt class="docutils literal"><span class="pre">to_file</span></tt> has been
+run in a previous session. We simulate this by assigning another
+value to <tt class="docutils literal"><span class="pre">d</span></tt>. Then we reconstruct <tt class="docutils literal"><span class="pre">d</span></tt> from the file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="mi">1</span>
+<span class="gp">sage: </span><span class="n">d</span>
+<span class="go">1</span>
+<span class="gp">sage: </span><span class="n">pathname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SAGE_TMP</span><span class="p">,</span> <span class="s">&#39;outfile1&#39;</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">pathname</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">d</span>
+<span class="go">RestrictedPartitionFunction for [6, 31, 10], consisting of 3 lists with a total of 5 period objects</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="resparfunc.RestrictedPartitionFunction.build_next">
+<em class="property">classmethod </em><tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">build_next</tt><big>(</big><em>a</em>, <em>dl</em><big>)</big><a class="headerlink" href="#resparfunc.RestrictedPartitionFunction.build_next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a new object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> from an
+existing one, with an additional positive integer <tt class="docutils literal"><span class="pre">a</span></tt> in the
+restriction list.</p>
+<p>Using <tt class="docutils literal"><span class="pre">build_next</span></tt>, one can take advantage of an already
+constructed <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object that took a
+long time to construct if additions to the restriction list are
+needed later. However, remark that if the complete restriction list
+is known from the beginning, a considerably shorter overall
+construction time can be often achieved as compared to successive
+calls to <tt class="docutils literal"><span class="pre">build_next</span></tt>, because the numbers from <tt class="docutils literal"><span class="pre">parts_in</span></tt>
+are first put into an order that is presumably better suited
+for the calculations.</p>
+<p>Also remark that the content of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>
+object constructed by successive calls to <tt class="docutils literal"><span class="pre">build_next</span></tt>
+will not necessarily be the same as when the list is given at the
+beginning, but it will always lead to the same results when used
+to get the <tt class="docutils literal"><span class="pre">number_of_partitions</span></tt> for the same number <tt class="docutils literal"><span class="pre">t</span></tt>.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">a</span></tt> &#8211; a positive integer</li>
+<li><tt class="docutils literal"><span class="pre">dl</span></tt> &#8211; an object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt></li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>an object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt></li>
+</ul>
+<p>EXAMPLES:</p>
+<p>Construct partition function <tt class="docutils literal"><span class="pre">d1</span></tt> for a restriction list. Starting
+from <tt class="docutils literal"><span class="pre">d1</span></tt>, construct <tt class="docutils literal"><span class="pre">d2</span></tt> with an additional number in the
+restriction list. Show summary of both restricted partition functions
+and use them to get number of partitions:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">print_time</span><span class="o">=</span><span class="bp">False</span>  <span class="c"># suppress timing for doctest</span>
+<span class="gp">sage: </span><span class="n">d1</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">])</span>
+<span class="gp">sage: </span><span class="n">d2</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="o">.</span><span class="n">build_next</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">dl</span><span class="o">=</span><span class="n">d1</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d1</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [5, 6, 10], consisting of 3 lists with a total of 5 period objects:</span>
+<span class="go">power=0, 2 PO(s) with period: 10,6</span>
+<span class="go">power=1, 2 PO(s) with period: 5,2</span>
+<span class="go">power=2, 1 PO(s) with period: 1</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d2</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [5, 6, 10, 2], consisting of 4 lists with a total of 6 period objects:</span>
+<span class="go">power=0, 2 PO(s) with period: 10,6</span>
+<span class="go">power=1, 2 PO(s) with period: 2,5</span>
+<span class="go">power=2, 1 PO(s) with period: 2</span>
+<span class="go">power=3, 1 PO(s) with period: 1</span>
+<span class="gp">sage: </span><span class="n">d1</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="go">1</span>
+<span class="gp">sage: </span><span class="n">d2</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+<p>Now construct <tt class="docutils literal"><span class="pre">d3</span></tt> for the same restriction list as the resulting
+list for <tt class="docutils literal"><span class="pre">d2</span></tt>.
+Verify that <tt class="docutils literal"><span class="pre">d2</span></tt> and <tt class="docutils literal"><span class="pre">d3</span></tt> give the same
+<tt class="docutils literal"><span class="pre">number_of_partitions</span></tt> for several input numbers.
+Note that the content of <tt class="docutils literal"><span class="pre">d2</span></tt> and <tt class="docutils literal"><span class="pre">d3</span></tt> is not the same:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d3</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="gp">sage: </span><span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">100.</span><span class="o">.</span><span class="mi">200</span><span class="p">]</span> <span class="k">if</span> <span class="n">d2</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="n">d3</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="n">t</span><span class="p">)])</span>
+<span class="go">0</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d3</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [2, 5, 6, 10], consisting of 4 lists with a total of 6 period objects:</span>
+<span class="go">power=0, 2 PO(s) with period: 6,10</span>
+<span class="go">power=1, 2 PO(s) with period: 2,5</span>
+<span class="go">power=2, 1 PO(s) with period: 2</span>
+<span class="go">power=3, 1 PO(s) with period: 1</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">2 period object(s):</span>
+<span class="go">P=2, values=[71/600, 9/400]</span>
+<span class="go">P=5, values=[29/600, 17/600, 29/600, 1/120, 1/120]</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d3</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="go">2 period object(s):</span>
+<span class="go">P=2, values=[19/150, 37/1200]</span>
+<span class="go">P=5, values=[1/25, 1/50, 1/25, 0, 0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-simple-resparfunc">
+<span id="restrictedpartitionfunction-class-simple-version"></span><h2>RestrictedPartitionFunction class - simple version<a class="headerlink" href="#module-simple-resparfunc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="simple-resparfunc.RestrictedPartitionFunction">
+<em class="property">class </em><tt class="descclassname">simple-resparfunc.</tt><tt class="descname">RestrictedPartitionFunction</tt><big>(</big><em>parts_in=None</em>, <em>poly_coeffs=None</em>, <em>empty=False</em><big>)</big><a class="headerlink" href="#simple-resparfunc.RestrictedPartitionFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>A RestrictedPartitionFunction allows to get the number
+of partitions with parts in a given list of positive integers
+for arbitrary nonnegative integers very efficiently.</p>
+<p>This class implements the simple version of the algorithm and
+is not optimized. Its only purpose is to illustrate the idea of 
+the algorithm. An optimized version is also available.</p>
+<p>Once constructed with <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction(parts_in=A)</span></tt>
+for a specific restriction list <tt class="docutils literal"><span class="pre">A</span></tt>, a
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object can be used to calculate the
+number of partitions for an integer <tt class="docutils literal"><span class="pre">t</span></tt> using the object&#8217;s method
+<tt class="docutils literal"><span class="pre">.number_of_partitions(t)</span></tt>.
+Note that this gives the same result as
+<tt class="docutils literal"><span class="pre">Partitions(t,</span> <span class="pre">parts_in=A).cardinality()</span></tt>, but the once
+constructed object can be reused for different values of <tt class="docutils literal"><span class="pre">t</span></tt> and
+the values of <tt class="docutils literal"><span class="pre">t</span></tt> can be considerably larger.</p>
+<p>The representation of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> is based on
+the fact that the restricted partition function <img class="math" src="_images/math/5835f9341e20dd8400f9c723bfcad70cfcc3a231.png" alt="d(t)"/> for
+<img class="math" src="_images/math/bf436760bdd5c3bd026105d2c1da72d2e35a48a3.png" alt="A=(a_{1},a_{2},...,a_{n})"/> can be written as
+<img class="math" src="_images/math/4d47fb3df455c4289ad8058e2b486d857775b122.png" alt="d(t)=\sum_{m=0}^{n-1}\sum_{i=1}^{u_{m}}f_{m,i}(t)t^{m}"/> with
+appropriate natural numbers <img class="math" src="_images/math/ffaaac0e785dcacdf0459f6106bb5469dca25e56.png" alt="u_{m}"/> and periodical functions
+<img class="math" src="_images/math/ea51a34ed63a6a9e16dfdbcb3e7dbe0f6c842c4f.png" alt="f_{m,i}"/>, where <img class="math" src="_images/math/2ef47443c70ee8c00cba1c50b2cf488fcec45b8b.png" alt="m=0,...,n-1"/> and <img class="math" src="_images/math/2d6119de8b632bf45f1451acdc264cb90c5656e9.png" alt="i=1,...,u_{m}"/>.
+The periods of
+the functions <img class="math" src="_images/math/ea51a34ed63a6a9e16dfdbcb3e7dbe0f6c842c4f.png" alt="f_{m,i}"/> are correlated with common factors of the
+numbers <img class="math" src="_images/math/2a772bd794fbedb2976268c491686644aefc02e8.png" alt="a_{i}"/>.
+We represent a periodical function <img class="math" src="_images/math/ea51a34ed63a6a9e16dfdbcb3e7dbe0f6c842c4f.png" alt="f_{m,i}"/> by an object of type
+<tt class="docutils literal"><span class="pre">PeriodObject</span></tt>  containing its period <img class="math" src="_images/math/7096d368b028675eebc1450e7e0b8e7c715d892d.png" alt="P_{m,i}"/> and a list of
+function values <img class="math" src="_images/math/252dfe9bc51567c22b88b5129070b32328e433b2.png" alt="f_{m,i}(0),...,f_{m,i}(P_{m,i}-1)"/>. 
+Remark that such a representation of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>
+is not unique.</p>
+<p>To explore the content of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object
+<tt class="docutils literal"><span class="pre">d</span></tt>, one can use the object method <tt class="docutils literal"><span class="pre">get_content_str()</span></tt>. With the
+argument <tt class="docutils literal"><span class="pre">output_format</span></tt> it is possible to select the extent and
+presentation of the returned content. As an example, with
+<tt class="docutils literal"><span class="pre">output_format=summary</span></tt> one gets the number of period objects
+and the respective periods for each power. The full content is
+returned if <tt class="docutils literal"><span class="pre">output_format=full</span></tt> is given. Be aware that the
+amount of information can be very large in this case. Another
+string representation of the full content which may be better
+suited for a subsequent evaluation can be obtained with
+<tt class="docutils literal"><span class="pre">output_format=list</span></tt>.</p>
+<p>If a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object for a given restriction
+list has been already constructed, one can obtain a new
+<tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> for a restriction list with an
+additional positive integer <tt class="docutils literal"><span class="pre">a</span></tt> with the class method
+<tt class="docutils literal"><span class="pre">build_next()</span></tt>.</p>
+<p>EXAMPLES:</p>
+<p>Construct some partition functions for specific restriction lists
+and use them to get the number of partitions for several numbers:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">])</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+<span class="go">3</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="go">8338334</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">20</span><span class="p">)</span>
+<span class="go">833333333333333333383333333333333333334</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">10</span><span class="o">**</span><span class="mi">6</span><span class="p">)</span><span class="o">.</span><span class="n">ndigits</span><span class="p">()</span>
+<span class="go">1999999</span>
+</pre></div>
+</div>
+<p>Comparing <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction().number_of_partitions()</span></tt> with
+<tt class="docutils literal"><span class="pre">Partitions().cardinality()</span></tt>. The result must be the same:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">A</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">12</span><span class="p">,</span><span class="mi">13</span><span class="p">]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="n">t</span><span class="o">=</span><span class="mi">500</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">==</span> <span class="n">Partitions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">cardinality</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">sage: </span><span class="nb">len</span><span class="p">([</span><span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="p">[</span><span class="mf">100.</span><span class="o">.</span><span class="mi">200</span><span class="p">]</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">number_of_partitions</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Partitions</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span><span class="o">.</span><span class="n">cardinality</span><span class="p">()])</span>
+<span class="go">0</span>
+</pre></div>
+</div>
+<p>Showing the content of a <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">d</span> <span class="o">=</span> <span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s">&#39;full&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [10, 5, 6], consisting of 3 lists with a total of 5 period objects:</span>
+<span class="go">power=0, 2 period object(s):</span>
+<span class="go">P=10, values=[0, -17/50, -19/25, -33/50, -26/25, 0, -11/25, -14/25, -24/25, -16/25]</span>
+<span class="go">P=6, values=[1, 7/24, 2/3, 5/8, 1, 5/8]</span>
+<span class="go">power=1, 2 period object(s):</span>
+<span class="go">P=2, values=[1/30, 1/60]</span>
+<span class="go">P=5, values=[1/20, 3/100, 1/100, -1/100, -3/100]</span>
+<span class="go">power=2, 1 period object(s):</span>
+<span class="go">P=1, values=[1/600]</span>
+</pre></div>
+</div>
+<p>Showing summary of period objects contained in the representation of an
+object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">sage: </span><span class="n">A</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">)]</span>
+<span class="gp">sage: </span><span class="n">d</span><span class="o">=</span><span class="n">RestrictedPartitionFunction</span><span class="p">(</span><span class="n">parts_in</span><span class="o">=</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">sage: </span><span class="k">print</span> <span class="n">d</span><span class="o">.</span><span class="n">get_content_str</span><span class="p">(</span><span class="n">output_format</span><span class="o">=</span><span class="s">&#39;summary&#39;</span><span class="p">)</span>
+<span class="go">RestrictedPartitionFunction for [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], consisting of 11 lists with a total of 19 period objects:</span>
+<span class="go">power=0, 6 PO(s) with period: 8,11,10,9,7,6</span>
+<span class="go">power=1, 3 PO(s) with period: 4,5,3</span>
+<span class="go">power=2, 2 PO(s) with period: 2,3</span>
+<span class="go">power=3, 1 PO(s) with period: 2</span>
+<span class="go">power=4, 1 PO(s) with period: 2</span>
+<span class="go">power=5, 1 PO(s) with period: 1</span>
+<span class="go">power=6, 1 PO(s) with period: 1</span>
+<span class="go">power=7, 1 PO(s) with period: 1</span>
+<span class="go">power=8, 1 PO(s) with period: 1</span>
+<span class="go">power=9, 1 PO(s) with period: 1</span>
+<span class="go">power=10, 1 PO(s) with period: 1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="member-functions-of-simple-resparfunc-s-restrictedpartitionfunction">
+<h2>Member functions of simple-resparfunc&#8217;s RestrictedPartitionFunction<a class="headerlink" href="#member-functions-of-simple-resparfunc-s-restrictedpartitionfunction" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Remark that these methods are similar to the methods of the RestrictedPartitionFunction class from the resparfunc module, but there are fewer methods available.</p>
+</div>
+<dl class="method">
+<dt id="simple-resparfunc.RestrictedPartitionFunction.number_of_partitions">
+<tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">number_of_partitions</tt><big>(</big><em>t</em><big>)</big><a class="headerlink" href="#simple-resparfunc.RestrictedPartitionFunction.number_of_partitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of partitions of a nonnegative integer <tt class="docutils literal"><span class="pre">t</span></tt> with
+parts in a specific restriction list as contained in the current
+object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt>.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">t</span></tt> &#8211; a nonnegative integer</li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>the number of partitions of <tt class="docutils literal"><span class="pre">t</span></tt> with parts in the restriction
+list as contained in the current object</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="simple-resparfunc.RestrictedPartitionFunction.get_content_str">
+<tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">get_content_str</tt><big>(</big><em>output_format='summary'</em><big>)</big><a class="headerlink" href="#simple-resparfunc.RestrictedPartitionFunction.get_content_str" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string representation of the content of an object of
+type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> where the amount and
+representation of the information is selected by the argument
+<tt class="docutils literal"><span class="pre">output_format</span></tt>.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">output_format</span></tt> - (default: <tt class="docutils literal"><span class="pre">'summary'</span></tt>)<ul>
+<li><tt class="docutils literal"><span class="pre">'summary'</span></tt> &#8211; show number of period objects and their period</li>
+<li><tt class="docutils literal"><span class="pre">'full'</span></tt> &#8211; show full content, including values of period objects</li>
+<li><tt class="docutils literal"><span class="pre">'list'</span></tt> &#8211; show full content in list form</li>
+</ul>
+</li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>a string with the representation of the content of the object in
+the requested <tt class="docutils literal"><span class="pre">output_format</span></tt>.</li>
+</ul>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="simple-resparfunc.RestrictedPartitionFunction.build_next">
+<em class="property">classmethod </em><tt class="descclassname">RestrictedPartitionFunction.</tt><tt class="descname">build_next</tt><big>(</big><em>a</em>, <em>dl</em><big>)</big><a class="headerlink" href="#simple-resparfunc.RestrictedPartitionFunction.build_next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a new object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> from an
+existing one, with an additional positive integer <tt class="docutils literal"><span class="pre">a</span></tt> in the
+restriction list.</p>
+<p>Using <tt class="docutils literal"><span class="pre">build_next</span></tt>, one can take advantage of an already
+constructed <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt> object that took a
+long time to construct if additions to the restriction list are
+needed later.</p>
+<p>INPUT:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">a</span></tt> &#8211; a positive integer</li>
+<li><tt class="docutils literal"><span class="pre">dl</span></tt> &#8211; an object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt></li>
+</ul>
+<p>OUTPUT:</p>
+<ul class="simple">
+<li>an object of type <tt class="docutils literal"><span class="pre">RestrictedPartitionFunction</span></tt></li>
+</ul>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">resparfunc 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2015, Anne Huschitt.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>

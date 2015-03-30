@@ -1,0 +1,42 @@
+.. resparfunc documentation master file, created by
+
+Documentation of the Restricted Partition Function
+===================================================
+
+This is a sagemath implementation of an algorithm to construct the restricted partition function for a given list of positive numbers (also known als Sylvester's denumerant). A prerequisite for using this code is a properly working installation of `sage <http://www.sagemath.org/>`_.
+
+The code allows to explore the periodic structure of the partition function as described in the paper "Properties of the Restricted Partition Function" and implements the algorithm outlined therein. It comes in two versions - a simple one which is intended mainly for illustration of the algorithm outlined in the paper and an optimized version that can be used for restriction lists with more and / or greater numbers. The description of the optimized version also contains various usage examples.
+
+.. note::
+
+    We want to draw your attention especially to the last example contained in the description of the RestrictedPartitionFunction class, where one can get an impression about the performance of the algorithm and the space needed for the representation of the restricted partition function.
+    The tests have been done on a 64-bit Ubuntu laptop with 4 GB of RAM and four Intel(R) Core(TM) i5-2410M processors with a locally installed copy of sage version 6.2. 
+
+RestrictedPartitionFunction class - optimized version
+-----------------------------------------------------
+.. module:: resparfunc
+.. autoclass:: RestrictedPartitionFunction
+
+Member functions
+----------------
+.. currentmodule:: resparfunc
+.. automethod:: RestrictedPartitionFunction.number_of_partitions
+.. automethod:: RestrictedPartitionFunction.get_content_str
+.. automethod:: RestrictedPartitionFunction.to_file
+.. automethod:: RestrictedPartitionFunction.from_file
+.. automethod:: RestrictedPartitionFunction.build_next
+
+RestrictedPartitionFunction class - simple version
+--------------------------------------------------
+.. module:: simple-resparfunc
+.. autoclass:: RestrictedPartitionFunction
+
+Member functions of simple-resparfunc's RestrictedPartitionFunction
+-------------------------------------------------------------------
+.. note:: Remark that these methods are similar to the methods of the RestrictedPartitionFunction class from the resparfunc module, but there are fewer methods available.
+
+.. currentmodule:: simple-resparfunc
+.. automethod:: RestrictedPartitionFunction.number_of_partitions
+.. automethod:: RestrictedPartitionFunction.get_content_str
+.. automethod:: RestrictedPartitionFunction.build_next
+
